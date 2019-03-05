@@ -1,27 +1,58 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component, Fragment } from 'react';
 
-class App extends Component {
-  render() {
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    users: [],
+    error: null,
+  };
+
+  fetchUsers() {
+    // Where we're fetching data from
+    fetch(`https://jsonplaceholder.typicode.com/users`)
+    // We get the API response and receive data in JSON format...
+      .then(response => response.json())
+      // ...then we update the users state
+      .then(data =>
+        this.setState({
+          users: data,
+          isLoading: false,
+        })
+      )
+      // Catch any errors we hit and update the app
+      .catch(error => this.setState({ error, isLoading: false }));
+  }
+
+  componentDidMount() {
+    this.fetchUsers();
+  }
+
+  render () {
+    const { isLoading, users, error } = this.state;
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <React.Fragment>
+        <h1>Random User</h1>
+        // Display a message if we encounter an error
+        {error ? <p>{error.message}</p> : null}
+        // Here's our data check
+        {!isLoading ? (
+          users.map(user => {
+            const { username, name, email } = user;
+            return (
+              <div key={username}>
+                <p>Name: {name}</p>
+                <p>Email Address: {email}</p>
+                <hr />
+              </div>
+            );
+          })
+          // If there is a delay in data, let's let the user know it's loading
+        ) : (
+          <h3>Loading...</h3>
+        )}
+      </React.Fragment>
     );
+
   }
 }
 
